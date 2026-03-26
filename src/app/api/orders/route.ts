@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    const parsed = orders.map((order) => ({
+    const parsed = orders.map((order: any) => ({
       ...order,
       items: JSON.parse(order.items),
     }));
