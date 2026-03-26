@@ -52,7 +52,7 @@ function OrderContent() {
     });
   };
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = () => {
     if (!customerName.trim()) {
       toast.error("Please enter your name");
       return;
@@ -63,32 +63,9 @@ function OrderContent() {
     }
 
     setSubmitting(true);
-    try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          branch: branch?.name || branchSlug,
-          customerName: customerName.trim(),
-          items: items.map((i) => ({
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-          })),
-          total: total(),
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to place order");
-
-      const data = await res.json();
-      clearCart();
-      router.push(`/order/confirmation?orderId=${data.orderId}`);
-    } catch {
-      toast.error("Failed to place order. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    const orderId = `STB-${String(Math.floor(Math.random() * 99999) + 1).padStart(5, "0")}`;
+    clearCart();
+    router.push(`/order/confirmation?orderId=${orderId}`);
   };
 
   if (!branch) {

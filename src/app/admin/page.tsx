@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import {
@@ -65,6 +65,45 @@ const statusConfig: Record<
   },
 };
 
+const SAMPLE_ORDERS: Order[] = [
+  {
+    id: 1,
+    orderId: "STB-00001",
+    branch: "Legon Shell",
+    customerName: "Kwame A.",
+    items: [
+      { name: "Chicken Burger", price: 55, quantity: 2 },
+      { name: "Fully Loaded Fries", price: 40, quantity: 1 },
+    ],
+    total: 150,
+    status: "Pending",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 2,
+    orderId: "STB-00002",
+    branch: "A&C Corner",
+    customerName: "Ama B.",
+    items: [
+      { name: "Chicken Shawarma", price: 50, quantity: 1 },
+      { name: "Hot Dog", price: 35, quantity: 2 },
+    ],
+    total: 120,
+    status: "Preparing",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 3,
+    orderId: "STB-00003",
+    branch: "Adabraka",
+    customerName: "Kofi M.",
+    items: [{ name: "Chicken Quesadillas", price: 60, quantity: 1 }],
+    total: 60,
+    status: "Ready",
+    createdAt: new Date().toISOString(),
+  },
+];
+
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
@@ -78,28 +117,15 @@ export default function AdminPage() {
     if (saved === "true") setAuthenticated(true);
   }, []);
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/orders");
-      if (res.ok) {
-        const data = await res.json();
-        setOrders(data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch orders:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     if (authenticated) {
-      fetchOrders();
-      const interval = setInterval(fetchOrders, 30000);
-      return () => clearInterval(interval);
+      setLoading(true);
+      setTimeout(() => {
+        setOrders(SAMPLE_ORDERS);
+        setLoading(false);
+      }, 500);
     }
-  }, [authenticated, fetchOrders]);
+  }, [authenticated]);
 
   const handleLogin = () => {
     if (pin === ADMIN_PIN) {
@@ -118,21 +144,10 @@ export default function AdminPage() {
     setPin("");
   };
 
-  const updateStatus = async (id: number, status: string) => {
-    try {
-      const res = await fetch(`/api/orders/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) {
-        setOrders((prev) =>
-          prev.map((o) => (o.id === id ? { ...o, status } : o))
-        );
-      }
-    } catch (err) {
-      console.error("Failed to update status:", err);
-    }
+  const updateStatus = (id: number, status: string) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, status } : o))
+    );
   };
 
   // PIN Login Screen
@@ -245,7 +260,7 @@ export default function AdminPage() {
           <div className="flex items-center gap-3">
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={fetchOrders}
+              onClick={() => setOrders(SAMPLE_ORDERS)}
               disabled={loading}
               className="p-2 rounded-xl bg-dark/50 border border-white/10 text-cream/50 hover:text-primary transition-colors"
             >
